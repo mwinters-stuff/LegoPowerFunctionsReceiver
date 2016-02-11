@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="PowerFunctions" />
+		<Option makefile_is_custom="1" />
+		<Option execution_dir="/home/mathew/Development/PowerFunctions/src" />
+		<Option pch_mode="2" />
+		<Option compiler="avr-gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="PowerFunctions" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="avr-gcc" />
+			</Target>
+			<Target title="Release">
+				<Option output="PowerFunctions" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="avr-gcc" />
+				<ExtraCommands>
+					<Add before="$(PROJECT_DIR)/script/killminiterm.sh" />
+					<Add after="$(PROJECT_DIR)/script/startminiterm.sh" />
+				</ExtraCommands>
+				<MakeCommands>
+					<Build command="$make -f $makefile upload" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -f $makefile upload &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="lib/IRremote/Contributors.md" />
+		<Unit filename="lib/IRremote/IRremote.cpp" />
+		<Unit filename="lib/IRremote/IRremote.h" />
+		<Unit filename="lib/IRremote/IRremoteInt.h" />
+		<Unit filename="lib/IRremote/LICENSE.txt" />
+		<Unit filename="lib/IRremote/README.md" />
+		<Unit filename="lib/IRremote/changelog.md" />
+		<Unit filename="lib/IRremote/examples/AiwaRCT501SendDemo/AiwaRCT501SendDemo.ino" />
+		<Unit filename="lib/IRremote/examples/IRrecord/IRrecord.ino" />
+		<Unit filename="lib/IRremote/examples/IRrecvDemo/IRrecvDemo.ino" />
+		<Unit filename="lib/IRremote/examples/IRrecvDump/IRrecvDump.ino" />
+		<Unit filename="lib/IRremote/examples/IRrecvDumpV2/IRrecvDumpV2.ino" />
+		<Unit filename="lib/IRremote/examples/IRrelay/IRrelay.ino" />
+		<Unit filename="lib/IRremote/examples/IRsendDemo/IRsendDemo.ino" />
+		<Unit filename="lib/IRremote/examples/IRsendRawDemo/IRsendRawDemo.ino" />
+		<Unit filename="lib/IRremote/examples/IRtest/IRtest.ino" />
+		<Unit filename="lib/IRremote/examples/IRtest2/IRtest2.ino" />
+		<Unit filename="lib/IRremote/examples/JVCPanasonicSendDemo/JVCPanasonicSendDemo.ino" />
+		<Unit filename="lib/IRremote/examples/LGACSendDemo/LGACSendDemo.ino" />
+		<Unit filename="lib/IRremote/examples/LGACSendDemo/LGACSendDemo.md" />
+		<Unit filename="lib/IRremote/irPronto.cpp" />
+		<Unit filename="lib/IRremote/irRecv.cpp" />
+		<Unit filename="lib/IRremote/irSend.cpp" />
+		<Unit filename="lib/IRremote/ir_Aiwa.cpp" />
+		<Unit filename="lib/IRremote/ir_Denon.cpp" />
+		<Unit filename="lib/IRremote/ir_Dish.cpp" />
+		<Unit filename="lib/IRremote/ir_JVC.cpp" />
+		<Unit filename="lib/IRremote/ir_LG.cpp" />
+		<Unit filename="lib/IRremote/ir_Mitsubishi.cpp" />
+		<Unit filename="lib/IRremote/ir_NEC.cpp" />
+		<Unit filename="lib/IRremote/ir_Panasonic.cpp" />
+		<Unit filename="lib/IRremote/ir_PowerFunctions.cpp" />
+		<Unit filename="lib/IRremote/ir_RC5_RC6.cpp" />
+		<Unit filename="lib/IRremote/ir_Samsung.cpp" />
+		<Unit filename="lib/IRremote/ir_Sanyo.cpp" />
+		<Unit filename="lib/IRremote/ir_Sharp.cpp" />
+		<Unit filename="lib/IRremote/ir_Sony.cpp" />
+		<Unit filename="lib/IRremote/ir_Template.cpp" />
+		<Unit filename="lib/IRremote/ir_Whynter.cpp" />
+		<Unit filename="lib/IRremote/keywords.txt" />
+		<Unit filename="lib/IRremote/library.json" />
+		<Unit filename="lib/IRremote/library.properties" />
+		<Unit filename="src/Makefile" />
+		<Unit filename="src/main-app.cc" />
+		<Unit filename="src/openpf.cc" />
+		<Unit filename="src/openpf.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
