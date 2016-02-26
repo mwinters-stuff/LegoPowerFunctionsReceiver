@@ -6,202 +6,177 @@
  * http://arcfn.com
  */
 
+#include <Arduino.h>
 #include <IRremote.h>
-//#include <avr/interrupt.h>
-//#include <avr/io.h>
+
+#define SOFTPWM_OUTPUT_DELAY
+#include <PalatisSoftPWM.h>
+
+
 #include "openpf.h"
+#include "serial.h"
 
 #define RECV_PIN 2
 #define LED_PIN 7
 
-#define PIN_C2A_1 A0
-#define PIN_C2A_2 A1
-#define PIN_C2B_1 A2
-#define PIN_C2B_2 A3
+#define MOTOR_A 0
+#define MOTOR_B 1
+#define MOTOR_C 2
+#define MOTOR_D 3
 
-//#define PWM0A	IO_D6
-//#define	PWM0B	IO_D5
-//#define PWM2A	IO_B3
-//#define PWM2B	IO_D3
+#define MOTOR_A_F 0
+#define MOTOR_A_R 1
 
-#define PWM0A	6
-#define	PWM0B	5
-#define PWM2A	11
-#define PWM2B	3
+#define MOTOR_B_F 2
+#define MOTOR_B_R 3
 
+#define MOTOR_C_F 4
+#define MOTOR_C_R 5
+
+#define MOTOR_D_F 6
+#define MOTOR_D_R 7
+
+SOFTPWM_DEFINE_CHANNEL(MOTOR_A_F, DDRD, PORTD, PORTD5);
+SOFTPWM_DEFINE_CHANNEL(MOTOR_A_R, DDRD, PORTD, PORTD6);
+
+SOFTPWM_DEFINE_CHANNEL(MOTOR_B_F, DDRD, PORTD, PORTD3);
+SOFTPWM_DEFINE_CHANNEL(MOTOR_B_R, DDRB, PORTB, PORTB3);
+
+SOFTPWM_DEFINE_CHANNEL(MOTOR_C_F, DDRC, PORTC, PORTC0);
+SOFTPWM_DEFINE_CHANNEL(MOTOR_C_R, DDRC, PORTC, PORTC1);
+
+SOFTPWM_DEFINE_CHANNEL(MOTOR_D_F, DDRC, PORTC, PORTC2);
+SOFTPWM_DEFINE_CHANNEL(MOTOR_D_R, DDRC, PORTC, PORTC3);
+
+SOFTPWM_DEFINE_OBJECT(8);
 IRrecv irrecv(RECV_PIN,LED_PIN);
 
 decode_results results;
-#define NUMBER_CHANNELS 4
+#define NUMBER_CHANNELS 2
 OpenPfRx_channel channelData[NUMBER_CHANNELS];
 uint16_t legochannel[8] = {0,0,0,0,0,0,0,0}; //can be used to store retrieved data
 
+struct motorChannelStruct{
+  uint8_t forwardChannelA;
+  uint8_t reverseChannelA;
+  uint8_t forwardChannelB;
+  uint8_t reverseChannelB;
+  int16_t speedA;
+  int16_t speedB;
+};
+
+motorChannelStruct motorChannels[NUMBER_CHANNELS] = {
+  {MOTOR_A_F, MOTOR_A_R,MOTOR_B_F, MOTOR_B_R,0,0},
+  {MOTOR_C_F, MOTOR_C_R,MOTOR_D_F, MOTOR_D_R,0,0}
+};
+
+
+utils::MSerial *serial;
+
+PROGMEM const char c_HELLO[]              = "Lego Power Functions Receiver\n";
 
 void setup()
 {
+  serial = utils::MSerial::Instance();
+  serial->printf_P(c_HELLO);
+
   OpenPfRx_channel_init(&channelData[0],0);
   OpenPfRx_channel_init(&channelData[1],1);
-  OpenPfRx_channel_init(&channelData[2],2);
-  OpenPfRx_channel_init(&channelData[3],3);
-
-  Serial.begin(57600);
-
-  pinMode(PIN_C2A_1,OUTPUT);
-  pinMode(PIN_C2A_2,OUTPUT);
-  digitalWrite(PIN_C2A_1,LOW);
-  digitalWrite(PIN_C2A_2,LOW);
-
-  pinMode(PIN_C2B_1,OUTPUT);
-  pinMode(PIN_C2B_2,OUTPUT);
-  digitalWrite(PIN_C2B_1,LOW);
-  digitalWrite(PIN_C2B_2,LOW);
-
-//  pinMode(PWM0A,OUTPUT);
-//  pinMode(PWM0B,OUTPUT);
-//  pinMode(PWM2A,OUTPUT);
-//  pinMode(PWM2B,OUTPUT);
-
-  TCCR0A = TCCR2A = 0xF3;
-  TCCR0B = TCCR2B = 0x02;
-  OCR0A = OCR0B = OCR2A = OCR2B = 0;
-
-//	analogWrite(PWM0A, 0);
-//	analogWrite(PWM0B, 0);
-//	analogWrite(PWM2A, 0);
-//	analogWrite(PWM2B, 0);
-
+  serial->StartRead();
   irrecv.enableIRIn(); // Start the receiver
-  Serial.println("Ready");
-
+  PalatisSoftPWM.begin(500);
+  serial->printf_P(PSTR("Ready\n"));
 }
 
-void setOrangutanM1Speed(int speed)
+
+void setMotorASpeed(int channel, int speed)
 {
-//if(speed > 0){
-//    digitalWrite(PWM0A,HIGH);
-//    digitalWrite(PWM0B,LOW);
-//
-//  }else if(speed < 0){
-//    digitalWrite(PWM0A,LOW);
-//    digitalWrite(PWM0B,HIGH);
-//
-//  }else{
-//    digitalWrite(PWM0A,LOW);
-//    digitalWrite(PWM0B,LOW);
-//  }
-	unsigned char reverse = 0;
+ // serial->printf_P(PSTR("A\n"));
 
-	if (speed < 0)
-	{
-		speed = -speed;	// make speed a positive quantity
-		reverse = 1;	// preserve the direction
-	}
-	if (speed > 0xFF)	// 0xFF = 255
-		speed = 0xFF;
+  if(motorChannels[channel].speedA != speed){
+    motorChannels[channel].speedA = speed;
+    unsigned char reverse = 0;
 
-	if (reverse)
-	{
-		OCR0B = 0;		// hold one driver input high
-		OCR0A = speed;
-    //analogWrite(PWM0B, 0);
-    //analogWrite(PWM0A, speed);
-	}
-	else	// forward
-	{
-    OCR0B = speed;	// pwm one driver input
-		OCR0A = 0;		// hold the other driver input high
-//    analogWrite(PWM0A, 0);
-//    analogWrite(PWM0B, speed);
+    if (speed < 0)
+    {
+      speed = -speed;	// make speed a positive quantity
+      reverse = 1;	// preserve the direction
+    }
+    if (speed > 0xFF)	// 0xFF = 255
+      speed = 0xFF;
+
+    if (reverse)
+    {
+      serial->printf_P(PSTR("Set Motor A Channel %d Reverse %d\n"),channel, speed);
+      PalatisSoftPWM.set(motorChannels[channel].forwardChannelA , 0);
+      PalatisSoftPWM.set(motorChannels[channel].reverseChannelA, speed);
+
+    }
+    else	// forward
+    {
+      serial->printf_P(PSTR("Set Motor A Channel %d Forward %d\n"),channel, speed);
+      PalatisSoftPWM.set(motorChannels[channel].reverseChannelA, 0);
+      PalatisSoftPWM.set(motorChannels[channel].forwardChannelA , speed);
+    }
 	}
 }
 
-void setOrangutanM2Speed(int speed)
+void setMotorBSpeed(int channel, int speed)
 {
+  if(motorChannels[channel].speedB != speed){
+    motorChannels[channel].speedB = speed;
+    unsigned char reverse = 0;
 
-	unsigned char reverse = 0;
+    if (speed < 0)
+    {
+      speed = -speed;	// make speed a positive quantity
+      reverse = 1;	// preserve the direction
+    }
+    if (speed > 0xFF)	// 0xFF = 255
+      speed = 0xFF;
 
-	if (speed < 0)
-	{
-		speed = -speed;	// make speed a positive quantity
-		reverse = 1;	// preserve the direction
+    if (reverse)
+    {
+      serial->printf_P(PSTR("Set Motor B Channel %d Reverse %d\n"),channel, speed);
+      PalatisSoftPWM.set(motorChannels[channel].forwardChannelB , 0);
+      PalatisSoftPWM.set(motorChannels[channel].reverseChannelB, speed);
+    }
+    else	// forward
+    {
+      serial->printf_P(PSTR("Set Motor B Channel %d Forward %d\n"),channel, speed);
+      PalatisSoftPWM.set(motorChannels[channel].reverseChannelB, 0);
+      PalatisSoftPWM.set(motorChannels[channel].forwardChannelB , speed);
+    }
 	}
-	if (speed > 0xFF)	// 0xFF = 255
-		speed = 0xFF;
-
-
-	if (reverse)
-	{
-    analogWrite(PWM2B, 0);
-		analogWrite(PWM2A, speed);
-	}
-	else	// forward
-	{
-		analogWrite(PWM2A, 0);
-    analogWrite(PWM2B, speed);
-	}
-
 }
 
-void setM3Speed(int speed){
-  if(speed > 0){
-    digitalWrite(PIN_C2A_1,HIGH);
-    digitalWrite(PIN_C2A_2,LOW);
-
-  }else if(speed < 0){
-    digitalWrite(PIN_C2A_1,LOW);
-    digitalWrite(PIN_C2A_2,HIGH);
-
-  }else{
-    digitalWrite(PIN_C2A_1,LOW);
-    digitalWrite(PIN_C2A_2,LOW);
-  }
-}
-
-void setM4Speed(int speed){
-  if(speed > 0){
-    digitalWrite(PIN_C2B_1,HIGH);
-    digitalWrite(PIN_C2B_2,LOW);
-
-  }else if(speed < 0){
-    digitalWrite(PIN_C2B_1,LOW);
-    digitalWrite(PIN_C2B_2,HIGH);
-
-  }else{
-    digitalWrite(PIN_C2B_1,LOW);
-    digitalWrite(PIN_C2B_2,LOW);
-  }
-}
 
 void printOutput(OpenPfRx_output &data)
 {
-  Serial.print("PWM Value:      ");
-  Serial.println(data.pwmvalue);
-  Serial.print("Brake FloatCnt: ");
-  Serial.println(data.brakethenfloatcount);
-  Serial.print("C1:             ");
-  Serial.println(data.C1);
-  Serial.print("C2:             ");
-  Serial.println(data.C2);
-  Serial.print("Output Mode:    ");
+  serial->printf_P(PSTR("PWM Value:      %d\n"),data.pwmvalue);
+  serial->printf_P(PSTR("Brake FloatCnt: %d\n"),data.brakethenfloatcount);
+  serial->printf_P(PSTR("C1:             %d\n"),data.C1);
+  serial->printf_P(PSTR("C2:             %d\n"),data.C2);
+  serial->printf_P(PSTR("Output Mode:    "));
   switch(data.output_mode)
   {
   case OM_FWD:
-    Serial.println("Forward         ");
+    serial->printf_P(PSTR("Forward\n"));
     break;
   case OM_BWD:
-    Serial.println("Backward        ");
+    serial->printf_P(PSTR("Backward\n"));
     break;
   case OM_FLOAT:
-    Serial.println("Float           ");
+    serial->printf_P(PSTR("Float\n"));
     break;
   case OM_BRAKE:
-    Serial.println("Brake           ");
+    serial->printf_P(PSTR("Brake\n"));
     break;
   case OM_BRAKE_THEN_FLOAT:
-    Serial.println("Brake then Float");
+    serial->printf_P(PSTR("Brake then Float\n"));
     break;
   case OM_INDEPENDENT:
-    Serial.println("Independant     ");
+    serial->printf_P(PSTR("Independant\n"));
     break;
   }
 
@@ -209,53 +184,22 @@ void printOutput(OpenPfRx_output &data)
 
 void printData(OpenPfRx_channel &data)
 {
-  Serial.print("Channel:        ");
-  Serial.println(data.channel_number);
-  Serial.print("toggle:         ");
-  Serial.println(data.timeout_limit);
-  Serial.print("timeout:        ");
-  Serial.println(data.timeout);
-  Serial.print("timeout limit:  ");
-  Serial.println(data.timeout_limit);
-  Serial.print("timeout action: ");
-  Serial.println(data.timeout_action);
+  serial->printf_P(PSTR("Channel:        %d\n"),data.channel_number);
+  serial->printf_P(PSTR("toggle:         %d\n"),data.timeout_limit);
+  serial->printf_P(PSTR("timeout:        %d\n"),data.timeout);
+  serial->printf_P(PSTR("timeout limit:  %d\n"),data.timeout_limit);
+  serial->printf_P(PSTR("timeout action: %d\n"),data.timeout_action);
 
-  Serial.println("Output A");
+  serial->printf_P(PSTR("Output A\n"));
   printOutput(data.A);
-  Serial.println("Output B");
+  serial->printf_P(PSTR("Output B\n"));
   printOutput(data.B);
-  Serial.println();
-  Serial.println();
-
-}
-
-void setChannelPWM(uint8_t channelNumber,int aPWMSpeed, int bPWMSpeed)
-{
-  Serial.print("setChannelPWM ");
-  Serial.print(channelNumber);
-  Serial.print(" A ");
-  Serial.print(aPWMSpeed);
-  Serial.print(" B ");
-  Serial.println(bPWMSpeed);
-  switch(channelNumber){
-    case 0: // orangutan motors PWM
-      setOrangutanM1Speed(aPWMSpeed);
-      setOrangutanM2Speed(bPWMSpeed);
-    break;
-
-    case 1: // secondary motoros, no pwm?
-      setM3Speed(aPWMSpeed);
-      setM4Speed(bPWMSpeed);
-    break;
-
-  }
-  if(aPWMSpeed == 0 && bPWMSpeed == 0){
-    channelData[channelNumber].timeout_action = 0;
-  }
+  serial->printf_P(PSTR("\n\n"));
 }
 
 void channelDo(int channelNumber)
 {
+
   int pwmSpeedA = 0; // stop
   if(channelData[channelNumber].A.output_mode == OM_BWD)
   {
@@ -279,20 +223,15 @@ void channelDo(int channelNumber)
     channelData[channelNumber].timeout = channelData[channelNumber].timeout_limit;
     pwmSpeedB = channelData[channelNumber].B.pwmvalue;
   }
-//  Serial.print("PWM Values Channel ");
-//  Serial.print(channelNumber);
-//  Serial.print(" A ");
-//  Serial.print(pwmSpeedA);
-//  Serial.print(" B ");
-//  Serial.println(pwmSpeedB);
 
-  setChannelPWM(channelNumber,pwmSpeedA,pwmSpeedB);
+  setMotorASpeed(channelNumber,pwmSpeedA);
+  setMotorBSpeed(channelNumber,pwmSpeedB);
 
 }
 
-
 void loop()
 {
+
   if (irrecv.decode(&results))
   {
     uint16_t pfdata = results.value;
@@ -302,14 +241,12 @@ void loop()
       uint8_t channelNumber = OpenPfRxGetChannelNumber(pfdata);
       legochannel[channelNumber] = pfdata;
       OpenPfRxInterpreter(&legochannel[channelNumber] , &channelData[channelNumber]);
-      //printData(channelData[channelNumber]);
+     // printData(channelData[channelNumber]);
 
       channelDo(channelNumber);
-
     }
-
-
     irrecv.resume();
+
   }else{
 
     for(int channelNumber = 0; channelNumber < NUMBER_CHANNELS; channelNumber++){
@@ -318,21 +255,17 @@ void loop()
 
       if(channelData[channelNumber].timeout){
         --channelData[channelNumber].timeout;
-//        Serial.print("Timeout Down Channel ");
-//        Serial.print(channelNumber);
-//        Serial.print(" ");
-//        Serial.println(channelData[channelNumber].timeout);
       }
 
       if(channelData[channelNumber].timeout == 0 && channelData[channelNumber].timeout_action){
-        Serial.print("Timeout Channel ");
-        Serial.println(channelNumber);
-        setChannelPWM(channelNumber,0,0);
+        setMotorASpeed(channelNumber,0);
+        setMotorBSpeed(channelNumber,0);
         channelData[channelNumber].timeout_action = 0;
       }
     }
   }
 
-
-  delay(100);
+  serial->Read();
+  delay(10);
 }
+

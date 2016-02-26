@@ -48,15 +48,25 @@ uint8_t OpenPfRxComboDirectModeLUT[4][2]=
 };
 
 uint8_t OpenPfRx_pwmvalues[] = {   OpenPfRx_MIN_PWM_VALUE,
-                                   OpenPfRx_PWM_VALUE_STEP,     //PWM_STEP1
-                                   (OpenPfRx_PWM_VALUE_STEP*2), //PWM_STEP2
-                                   (OpenPfRx_PWM_VALUE_STEP*3), //PWM_STEP3
-                                   (OpenPfRx_PWM_VALUE_STEP*4), //PWM_STEP4
-                                   (OpenPfRx_PWM_VALUE_STEP*5), //PWM_STEP5
-                                   (OpenPfRx_PWM_VALUE_STEP*6), //PWM_STEP6
-                                   (OpenPfRx_PWM_VALUE_STEP*7), //PWM_STEP7
+                                   66,     //PWM_STEP1
+                                   98, //PWM_STEP2
+                                   129, //PWM_STEP3
+                                   162, //PWM_STEP4
+                                   193, //PWM_STEP5
+                                   225, //PWM_STEP6
+                                   255, //PWM_STEP7
                                    OpenPfRx_MAX_PWM_VALUE
                                };
+//uint8_t OpenPfRx_pwmvalues[] = {   OpenPfRx_MIN_PWM_VALUE,
+//                                   OpenPfRx_PWM_VALUE_STEP,     //PWM_STEP1
+//                                   (OpenPfRx_PWM_VALUE_STEP*2), //PWM_STEP2
+//                                   (OpenPfRx_PWM_VALUE_STEP*3), //PWM_STEP3
+//                                   (OpenPfRx_PWM_VALUE_STEP*4), //PWM_STEP4
+//                                   (OpenPfRx_PWM_VALUE_STEP*5), //PWM_STEP5
+//                                   (OpenPfRx_PWM_VALUE_STEP*6), //PWM_STEP6
+//                                   (OpenPfRx_PWM_VALUE_STEP*7), //PWM_STEP7
+//                                   OpenPfRx_MAX_PWM_VALUE
+//                               };
 
 //#define TIMEOUT_MARGIN 200
 
@@ -90,7 +100,7 @@ void OpenPfRx_channel_init(struct OpenPfRx_channel *channel, uint8_t number)
   channel->B.output_mode     = OM_FLOAT;
   channel->A.brakethenfloatcount = 0;
   channel->B.brakethenfloatcount = 0;
-  channel->timeout_limit = 100;
+  channel->timeout_limit = 50;
   channel->timeout_action    = 0;
   channel->toggle            = 0;
 }

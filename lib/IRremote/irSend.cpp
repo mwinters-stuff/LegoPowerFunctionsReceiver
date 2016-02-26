@@ -1,6 +1,11 @@
 #include "IRremote.h"
 #include "IRremoteInt.h"
 
+#ifndef ARDUINO
+extern void pinMode(uint8_t pin, uint8_t mode);
+extern void digitalWrite(uint8_t pin, uint8_t value);
+#endif
+
 //+=============================================================================
 void  IRsend::sendRaw (unsigned int buf[],  unsigned int len,  unsigned int hz)
 {
@@ -72,14 +77,14 @@ void  IRsend::enableIROut (int khz)
 // Custom delay function that circumvents Arduino's delayMicroseconds limit
 
 void IRsend::custom_delay_usec(unsigned long uSecs) {
-  if (uSecs > 4) {
-    unsigned long start = micros();
-    unsigned long endMicros = start + uSecs - 4;
-    if (endMicros < start) { // Check if overflow
-      while ( micros() > start ) {} // wait until overflow
-    }
-    while ( micros() < endMicros ) {} // normal wait
-  } 
+//  if (uSecs > 4) {
+//    unsigned long start = micros();
+//    unsigned long endMicros = start + uSecs - 4;
+//    if (endMicros < start) { // Check if overflow
+//      while ( micros() > start ) {} // wait until overflow
+//    }
+//    while ( micros() < endMicros ) {} // normal wait
+//  }
   //else {
   //  __asm__("nop\n\t"); // must have or compiler optimizes out
   //}

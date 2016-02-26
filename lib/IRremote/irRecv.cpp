@@ -6,6 +6,21 @@
 // Returns 0 if no data ready, 1 if data ready.
 // Results of decoding are stored in results
 //
+#ifndef ARDUINO
+#include <MWAVR.h>
+#include <avr/interrupt.h>
+
+void pinMode(uint8_t pin, uint8_t mode)
+{
+  if(mode == OUTPUT){
+    MWAVR::Digital::setOutput(pin,LOW);
+  }
+  if(mode == INPUT){
+    MWAVR::Digital::setInput(pin,1);
+  }
+}
+#endif
+
 int  IRrecv::decode (decode_results *results)
 {
 	results->rawbuf   = irparams.rawbuf;
@@ -122,14 +137,16 @@ void  IRrecv::enableIRIn ( )
 	// Prescale /8 (16M/8 = 0.5 microseconds per tick)
 	// Therefore, the timer interval can range from 0.5 to 128 microseconds
 	// Depending on the reset value (255 to 0)
+//	Serial.println("IR1");Serial.flush();
 	TIMER_CONFIG_NORMAL();
-
+//Serial.println("IR2");Serial.flush();
 	// Timer2 Overflow Interrupt Enable
 	TIMER_ENABLE_INTR;
-
+//Serial.println("IR3");Serial.flush();
 	TIMER_RESET;
-
+//Serial.println("IR4");Serial.flush();
 	sei();  // enable interrupts
+//Serial.println("IR5");Serial.flush();
 
 	// Initialize state machine variables
 	irparams.rcvstate = STATE_IDLE;
@@ -137,6 +154,7 @@ void  IRrecv::enableIRIn ( )
 
 	// Set pin modes
 	pinMode(irparams.recvpin, INPUT);
+//Serial.println("IR6");Serial.flush();
 }
 
 //+=============================================================================

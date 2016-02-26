@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="PowerFunctions" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="/home/mathew/Development/PowerFunctions/src" />
+		<Option execution_dir="src" />
 		<Option pch_mode="2" />
 		<Option compiler="avr-gcc" />
 		<Build>
@@ -13,26 +13,33 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="0" />
 				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add directory="src" />
+				</Compiler>
 			</Target>
 			<Target title="Release">
 				<Option output="PowerFunctions" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add directory="src" />
+				</Compiler>
 				<ExtraCommands>
 					<Add before="$(PROJECT_DIR)/script/killminiterm.sh" />
 					<Add after="$(PROJECT_DIR)/script/startminiterm.sh" />
 				</ExtraCommands>
 				<MakeCommands>
-					<Build command="$make -f $makefile upload" />
+					<Build command="$make -f $makefile $target" />
 					<CompileFile command="$make -f $makefile $file" />
 					<Clean command="$make -f $makefile clean" />
 					<DistClean command="$make -f $makefile distclean$target" />
 					<AskRebuildNeeded command="$make -q -f $makefile $target" />
-					<SilentBuild command="$make -f $makefile upload &gt; $(CMD_NULL)" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="Makefile" />
 		<Unit filename="lib/IRremote/Contributors.md" />
 		<Unit filename="lib/IRremote/IRremote.cpp" />
 		<Unit filename="lib/IRremote/IRremote.h" />
@@ -75,10 +82,12 @@
 		<Unit filename="lib/IRremote/keywords.txt" />
 		<Unit filename="lib/IRremote/library.json" />
 		<Unit filename="lib/IRremote/library.properties" />
-		<Unit filename="src/Makefile" />
+		<Unit filename="lib/PalatisSoftPWM/PalatisSoftPWM.h" />
 		<Unit filename="src/main-app.cc" />
 		<Unit filename="src/openpf.cc" />
 		<Unit filename="src/openpf.h" />
+		<Unit filename="src/serial.cc" />
+		<Unit filename="src/serial.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

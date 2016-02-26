@@ -5,7 +5,7 @@
 
 ### PROJECT_DIR
 ### This is the path to where you have created/cloned your project
-PROJECT_DIR       = /home/mathew/Development/PowerFunctions
+PROJECT_DIR       = ../
 
 ### AVR_GCC_VERSION
 ### Check if the version is equal or higher than 4.9
@@ -73,4 +73,7 @@ AVRDUDE_OPTS = -q -V -D
 
 ### path to Arduino.mk, inside the ARDMK_DIR, don't touch.
 include $(ARDMK_DIR)/Arduino.mk
+
+
+Release: upload
 
